@@ -14,8 +14,7 @@ knitr::opts_chunk$set(
   collapse = T,
   comment = "#>",
   fig.path = "man/figures/README-",
-  fig.pos = "center",
-  fig.width = 3.5
+  fig.pos = "center"
   #out.width = "100%"
 )
 ```
@@ -88,14 +87,64 @@ df <- mlgraph::eval_classifier(preds, target, pred, prob1) %>% glimpse
 ```
 
 
-```{r, fig.width = 9, fig.height = 3}
-gridExtra::grid.arrange(
+### ggplot2
+
+```{r, eval = F}
+gg_plot2 <- gridExtra::grid.arrange(
   gg_plot_confusion(df$confusion), 
   gg_plot_roc(df$roc),
   gg_plot_density(df$dens), nrow = 1
 )
+
+ggsave(gg_plot2, filename = "man/figures/gg_plot2.png", width = 18, height = 6)
 ```
 
+![](man/figures/gg_charts.png)
+
+
+### highcharter
+
+```{r, eval = F}
+pacman::p_load(shiny, shiny.semantic)
+shiny.semantic::semanticPage(
+  div(class= "ui three column grid", 
+    div(class = "column",
+      hc_plot_confusion(df$confusion)
+    ),
+    div(class = "column",
+      hc_plot_roc(df$roc)
+    ),
+    div(class = "column",
+      hc_plot_density(df$dens)
+    )
+  )
+)
+```
+
+
+![](man/figures/hc_charts.png)
+
+### apexcharter
+
+```{r, eval = F}
+pacman::p_load(shiny, shiny.semantic)
+shiny.semantic::semanticPage(
+  div(class= "ui three column grid", 
+    div(class = "column",
+      ax_plot_confusion(df$confusion)
+    ),
+    div(class = "column",
+      ax_plot_roc(df$roc)
+    ),
+    div(class = "column",
+      ax_plot_density(df$dens)
+    )
+  )
+)
+#htmltools::html_print(out)
+```
+
+![](man/figures/ax_charts.png)
 
 
 ```{r}
