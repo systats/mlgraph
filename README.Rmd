@@ -15,7 +15,7 @@ knitr::opts_chunk$set(
   comment = "#>",
   fig.path = "man/figures/README-",
   fig.pos = "center",
-  fig.width = 4
+  fig.width = 3.5
   #out.width = "100%"
 )
 ```
@@ -88,21 +88,19 @@ df <- mlgraph::eval_classifier(preds, target, pred, prob1) %>% glimpse
 ```
 
 
-```{r}
-gg_plot_confusion(df$confusion)
-```
-
-```{r}
-gg_plot_roc(df$roc)
-```
-
-
-```{r}
-gg_plot_density(df$dens)
+```{r, fig.width = 9, fig.height = 3}
+gridExtra::grid.arrange(
+  gg_plot_confusion(df$confusion), 
+  gg_plot_roc(df$roc),
+  gg_plot_density(df$dens), nrow = 1
+)
 ```
 
 
 
+```{r}
+sessionInfo()
+```
 
 
 
