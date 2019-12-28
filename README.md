@@ -9,9 +9,9 @@
 
 # mlgraph <img src="data/mlgraph.png" width="160px" align="right" />
 
-[![](https://travis-ci.org/systats/mlgraph.svg?branch=master)](https://travis-ci.org/systats/mlgraph)
 [![](https://img.shields.io/github/languages/code-size/systats/mlgraph.svg)](https://github.com/systats/mlgraph)
 [![](https://img.shields.io/github/last-commit/systats/mlgraph.svg)](https://github.com/systats/mlgraph/commits/master)
+[![](https://img.shields.io/badge/lifecycle-experimental-blue.svg)](https://www.tidyverse.org/lifecycle/#experimental)
 
 `mlgraph` provides performance visualizations for standardized ml models
 with linear, binary or multi tasks. It is implemented as an extension of
