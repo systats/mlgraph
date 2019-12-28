@@ -21,7 +21,7 @@ knitr::opts_chunk$set(
 
 # mlgraph <img src="data/mlgraph.png" width="160px" align="right" />
 
-```{r, echo = FALSE, results='asis', eval = T, eval = F}
+```{r, echo = FALSE, results='asis', eval = T, eval = T}
 library(badger)
 git_repo <- "systats/mlgraph"
 cat(
@@ -36,21 +36,74 @@ cat(
 ```
 
 
+`mlgraph` provides performance visualizations for standardized ml models with linear, binary or multi tasks. It is implemeted as an extension of [deeplyr](). At the moment several graphics packages are implemented including
+
+* `gg_` ggplot2s  
+* `hc_` highcharter 
+* `ax_` apexcharter 
+
+Computations are based on 
+
+* [Metrics](https://github.com/mfrasco/Metrics)
+* [yardstick](https://github.com/tidymodels/yardstick)
+
+Several task specific plots are avaible:
+
+* Linear 
+    + ...
+* Binary
+    + Confusion Matrix
+    + ROC
+    + Desnity
+* Multi
+    + Confusion Matrix
+    + ROC
+    + Desnity
+
+
 # Installation
 
-And the development version from [GitHub](https://github.com/) with:
+Get the development version from [GitHub](https://github.com/) with:
 
 ``` r
 # install.packages("devtools")
 devtools::install_github("systats/mlgraph")
 ```
 
-
 ```{r, echo = F}
 pacman::p_load(tidyverse, mlgraph)
-preds <- readRDS("data/preds.rds")
 ggplot2::theme_set(ggplot2::theme_bw())
 ```
+
+
+
+```{r}
+preds <- readRDS("data/preds.rds") %>% 
+  glimpse
+```
+
+
+```{r}
+df <- mlgraph::eval_classifier(preds, target, pred, prob1) %>% glimpse
+```
+
+
+```{r}
+gg_plot_confusion(df$confusion)
+```
+
+```{r}
+gg_plot_roc(df$roc)
+```
+
+
+```{r}
+gg_plot_density(df$dens)
+```
+
+
+
+
 
 
 
