@@ -14,11 +14,11 @@
 [![](https://img.shields.io/github/last-commit/systats/mlgraph.svg)](https://github.com/systats/mlgraph/commits/master)
 
 `mlgraph` provides performance visualizations for standardized ml models
-with linear, binary or multi tasks. It is implemeted as an extension of
+with linear, binary or multi tasks. It is implemented as an extension of
 [deeplyr](). At the moment several graphics packages are implemented
 including
 
-  - `gg_` ggplot2s  
+  - `gg_` ggplot2
   - `hc_` highcharter
   - `ax_` apexcharter
 
@@ -27,18 +27,18 @@ Computations are based on
   - [Metrics](https://github.com/mfrasco/Metrics)
   - [yardstick](https://github.com/tidymodels/yardstick)
 
-Several task specific plots are avaible:
+Several task specific plots are available:
 
   - Linear
       - …
   - Binary
       - Confusion Matrix
       - ROC
-      - Desnity
+      - Density
   - Multi
       - Confusion Matrix
       - ROC
-      - Desnity
+      - Density
 
 # Installation
 
