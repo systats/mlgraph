@@ -1,0 +1,56 @@
+---
+output: github_document
+---
+
+<head>
+  <link rel="stylesheet" type="text/css" href="https://d335w9rbwpvuxm.cloudfront.net/semantic.min.css"/>'
+</head>
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  warning = F, error = F, message = F,
+  collapse = T,
+  comment = "#>",
+  fig.path = "man/figures/README-"
+  #out.width = "100%"
+)
+```
+
+
+# mlgraph <img src="data/mlgraph.png" width="160px" align="right" />
+
+```{r, echo = FALSE, results='asis', eval = T, eval = F}
+library(badger)
+git_repo <- "systats/mlgraph"
+cat(
+  #"[![](https://cranlogs.r-pkg.org/badges/grand-total/peRspective)](https://cran.rstudio.com/web/packages/peRspective/index.html)",
+  # badge_custom("My 1st Package", "Ever", "blue"),
+  badge_travis(git_repo),
+  #badge_cran_release("peRspective", "blue"),
+  #"[![Codecov test coverage](https://codecov.io/gh/favstats/peRspective/branch/master/graph/badge.svg)](https://codecov.io/gh/favstats/peRspective?branch=master)",
+	badge_code_size(git_repo),
+	badge_last_commit(git_repo)
+)
+```
+
+
+# Installation
+
+And the development version from [GitHub](https://github.com/) with:
+
+``` r
+# install.packages("devtools")
+devtools::install_github("systats/mlgraph")
+```
+
+
+```{r, echo = F}
+pacman::p_load(tidyverse, mlgraph)
+preds <- readRDS("data/preds.rds")
+ggplot2::theme_set(ggplot2::theme_bw())
+```
+
+
+

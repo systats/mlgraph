@@ -1,0 +1,203 @@
+---
+title: "main"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# Packages
+
+```{r}
+#devtools::install_github("dreamRs/apexcharter")
+pacman::p_load(tidyverse, shiny, shiny.semantic, semantic.dashboard, highcharter, apexcharter, mlgraph)
+# ggplot2::theme_set(ggplot2::theme_classic())
+# devtools::document()
+# devtools::load_all()
+# devtools::install()
+```
+
+
+# Binary
+
+## Confusion Matrix
+
+```{r}
+load("data/preds.Rdata")
+confusion_df <- get_confusion_df(preds, target, pred)
+
+gg_plot_confusion(confusion_df)
+hc_plot_confusion(confusion_df)
+ax_plot_confusion(confusion_df)
+```
+
+
+## ROC
+
+```{r}
+roc_df <- get_roc_df(preds, target, contains("prob"))
+
+gg_plot_roc(roc_df)
+#gg_plot_roc2(preds$target, preds$prob)
+hc_plot_roc(roc_df)
+ax_plot_roc(roc_df)
+#ax_plot_roc(roc_df, type = "line")
+```
+
+
+
+## RP-Curve
+
+computes the precision at every unique value of the probability column (in addition to infinity)
+
+```{r}
+rp_df <- get_rp_df(preds$target, preds$prob)
+
+gg_plot_rp(rp_df)
+hc_plot_rp(rp_df)
+ax_plot_rp(rp_df)
+```
+
+
+## Probability Density
+
+```{r}
+dens_df <- get_dens_df(preds, target, prob)
+
+gg_plot_density(dens_df)
+hc_plot_density(dens_df)
+ax_plot_density(dens_df)
+```
+
+
+# Binary Threshold
+
+```{r}
+get_metrics_binary_df <- function(actual, pred, prob = NULL){
+  
+  if(!is.null(prob)){
+    pr <- list(
+      ll = Metrics::ll,
+      logloss = Metrics::logLoss,
+      auc = Metrics::auc
+    ) %>% purrr::imap_dfc(~{ .x(actual, prob)[1] })
+  }
+
+  class <- list(
+    precision = Metrics::precision,
+    recall = Metrics::recall,
+    fbeta_score = Metrics::fbeta_score,
+    accuracy = Metrics::accuracy
+  ) %>% purrr::imap_dfc(~{ .x(actual, pred)[1] })
+  
+  if(!is.null(prob)) class <- bind_cols(class, pr)
+  return(class)
+}
+
+get_threshold_binary_df <- function(actual, prob){
+  dplyr::tibble(thres = seq(0, 1,length.out = 100)) %>%
+    split(1:nrow(.)) %>%
+    purrr::map_dfr(~{
+      df <- dplyr::tibble(actual, prob) %>%
+        dplyr::mutate(pred = ifelse(prob > .x$thres, 1, 0))
+      
+      get_metrics_binary_df(df$actual, df$pred) %>% mutate(thres = .x$thres)
+    })
+}
+
+get_metrics_binary_df(preds$target, preds$pred, preds$prob)
+
+get_threshold_binary_df(preds$target, preds$prob) %>%
+  gather(metric, value, -thres) %>%
+  ggplot(aes(thres, value,colour = metric)) +
+  geom_line()
+```
+
+
+
+# Multi
+
+```{r}
+load("data/preds_multi.rdata")
+preds <- preds %>% mutate(target = target + 1) 
+```
+
+
+## Confusion
+
+```{r}
+confusion_df <- get_confusion_df(preds, target, pred)
+#e <- eval_classifier(preds$target, preds$pred)
+confusion_df %>% gg_plot_confusion()
+confusion_df %>% hc_plot_confusion()
+confusion_df %>% ax_plot_confusion()
+```
+
+
+## ROC
+
+```{r}
+roc_df <- get_roc_df(preds, target, prob)
+
+gg_plot_roc(roc_df)
+hc_plot_roc(roc_df)
+ax_plot_roc(roc_df)
+```
+
+
+
+## Probability Density
+
+```{r}
+dens_df <- preds%>% get_dens_df(target, prob)
+
+gg_plot_density(dens_df)
+hc_plot_density(dens_df)
+ax_plot_density(dens_df)
+```
+
+
+# Evals
+
+```{r}
+preds <- readRDS("data/preds.rds")
+
+nn <- eval_classifier(preds, target, pred, prob, path = "data")
+```
+
+
+
+
+# Other
+
+```{r, eval = F}
+get_gain_df <- function(actual, prob){
+  dplyr::tibble(actual, prob) %>%
+    dplyr::mutate_at(1, as.factor) %>%
+    dplyr::mutate(prob = 1-prob) %>%
+    yardstick::gain_curve(actual, prob) 
+}
+
+get_lift_df <- function(actual, prob){
+  dplyr::tibble(actual, prob) %>%
+    dplyr::mutate_at(1, as.factor) %>%
+    dplyr::mutate(prob = 1-prob) %>%
+    yardstick::lift_curve(actual, prob) 
+}
+
+gain_df <- get_gain_df(preds$target, preds$prob)
+lift_df <- get_lift_df(preds$target, preds$prob)
+
+gain_df %>%
+  ggplot2::ggplot(aes(x = .percent_tested, y = .percent_found)) +
+  ggplot2::geom_line() 
+
+lift_df %>%
+  ggplot2::ggplot(aes(x = .percent_tested, y = .lift)) +
+  ggplot2::geom_line() 
+```
+
+
+
