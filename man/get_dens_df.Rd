@@ -2,10 +2,10 @@
 % Please edit documentation in R/plot_density.R
 \name{get_dens_df}
 \alias{get_dens_df}
-\title{gg_plot_roc2}
+\title{get_dens_df}
 \usage{
-get_dens_df(.data, actual, prob)
+get_dens_df(.data, actual)
 }
 \description{
-gg_plot_roc2
+get_dens_df
 }

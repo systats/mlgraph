@@ -12,7 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 #devtools::install_github("dreamRs/apexcharter")
-pacman::p_load(tidyverse, shiny, shiny.semantic, semantic.dashboard, highcharter, apexcharter, mlgraph)
+pacman::p_load(tidyverse, apexcharter, mlgraph, recipes, deeplyr)
 # ggplot2::theme_set(ggplot2::theme_classic())
 # devtools::document()
 # devtools::load_all()
@@ -20,13 +20,47 @@ pacman::p_load(tidyverse, shiny, shiny.semantic, semantic.dashboard, highcharter
 ```
 
 
+
+```{r}
+mtcars <- mtcars %>% 
+  mutate(
+    id = 1:n(),
+    amnum = am,
+    am = as.factor(am),
+    cyl =  as.factor(as.numeric(as.factor(cyl))),
+    cyl0num = as.numeric(as.factor(cyl))-1, 
+    cyl0 = as.factor(cyl0num)
+  )
+
+### PS
+rec_linear <- recipes::recipe(hp ~ ., mtcars) %>%
+  update_role(id, new_role = "ID")
+
+### automatic?
+rec_binary<- recipes::recipe(am ~ ., mtcars) %>%
+  update_role(id, amnum, new_role = "ID")
+
+### number of cylinders
+rec_multi <- recipes::recipe(cyl ~ ., mtcars) %>%
+  update_role(id, cyl0, cyl0num, new_role = "ID") 
+```
+
+
 # Binary
+
+```{r}
+fb <- fit_learner(rec_binary, mtcars, list(), "binary", "rpart")
+fb$predict(mtcars)
+
+nn <- eval_classifier(fb$preds, "am", path = ".")
+```
+
 
 ## Confusion Matrix
 
 ```{r}
-load("data/preds.Rdata")
-confusion_df <- get_confusion_df(preds, target, pred)
+devtools::document()
+confusion_df <- get_confusion_df(fb$preds, am)
 
 gg_plot_confusion(confusion_df)
 hc_plot_confusion(confusion_df)
@@ -37,7 +71,7 @@ ax_plot_confusion(confusion_df)
 ## ROC
 
 ```{r}
-roc_df <- get_roc_df(preds, target, contains("prob"))
+roc_df <- get_roc_df(fb$preds, am)
 
 gg_plot_roc(roc_df)
 #gg_plot_roc2(preds$target, preds$prob)
@@ -53,7 +87,7 @@ ax_plot_roc(roc_df)
 computes the precision at every unique value of the probability column (in addition to infinity)
 
 ```{r}
-rp_df <- get_rp_df(preds$target, preds$prob)
+rp_df <- get_rp_df(fb$preds$am, fb$preds$prob)
 
 gg_plot_rp(rp_df)
 hc_plot_rp(rp_df)
@@ -64,7 +98,8 @@ ax_plot_rp(rp_df)
 ## Probability Density
 
 ```{r}
-dens_df <- get_dens_df(preds, target, prob)
+devtools::document()
+dens_df <- get_dens_df(fb$preds, am)
 
 gg_plot_density(dens_df)
 hc_plot_density(dens_df)
@@ -119,16 +154,18 @@ get_threshold_binary_df(preds$target, preds$prob) %>%
 
 # Multi
 
+
 ```{r}
-load("data/preds_multi.rdata")
-preds <- preds %>% mutate(target = target + 1) 
+fm <- fit_learner(rec_multi, mtcars, list(), "multi", "rpart")
+fm$predict(mtcars)
+preds <- fm$preds
 ```
 
 
 ## Confusion
 
 ```{r}
-confusion_df <- get_confusion_df(preds, target, pred)
+confusion_df <- get_confusion_df(preds, cyl, pred)
 #e <- eval_classifier(preds$target, preds$pred)
 confusion_df %>% gg_plot_confusion()
 confusion_df %>% hc_plot_confusion()
@@ -139,7 +176,7 @@ confusion_df %>% ax_plot_confusion()
 ## ROC
 
 ```{r}
-roc_df <- get_roc_df(preds, target, prob)
+roc_df <- get_roc_df(preds, cyl)
 
 gg_plot_roc(roc_df)
 hc_plot_roc(roc_df)
@@ -151,7 +188,7 @@ ax_plot_roc(roc_df)
 ## Probability Density
 
 ```{r}
-dens_df <- preds%>% get_dens_df(target, prob)
+dens_df <- preds %>% get_dens_df(cyl)
 
 gg_plot_density(dens_df)
 hc_plot_density(dens_df)
@@ -162,9 +199,8 @@ ax_plot_density(dens_df)
 # Evals
 
 ```{r}
-preds <- readRDS("data/preds.rds")
-
-nn <- eval_classifier(preds, target, pred, prob, path = "data")
+devtools::document()
+nn <- eval_classifier(preds, cyl)
 ```
 
 

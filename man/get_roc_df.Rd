@@ -4,7 +4,7 @@
 \alias{get_roc_df}
 \title{get_roc_df}
 \usage{
-get_roc_df(.data, actual, prob)
+get_roc_df(.data, actual)
 }
 \description{
 get_roc_df

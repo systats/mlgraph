@@ -4,7 +4,7 @@
 \alias{get_confusion_df}
 \title{get_confusion_df}
 \usage{
-get_confusion_df(.data, actual, pred)
+get_confusion_df(.data, actual)
 }
 \description{
 get_confusion_df

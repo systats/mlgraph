@@ -4,7 +4,7 @@
 \alias{eval_classifier}
 \title{eval_classifier}
 \usage{
-eval_classifier(.data, actual, pred, prob = "prob", path = NULL)
+eval_classifier(.data, actual, path = NULL)
 }
 \description{
 eval_classifier

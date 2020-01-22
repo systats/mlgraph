@@ -1,38 +1,16 @@
-#' gg_plot_roc2
+#' get_dens_df
 #'
 #' @export
-# get_dens_df <- function(actual, prob){
-#   dplyr::tibble(actual, prob) %>%
-#     split(.$actual) %>%
-#     purrr::imap(~{ density(.x$prob) }) %>%
-#     purrr::imap_dfr(~as.data.frame(.x[c("x", "y")]) %>% dplyr::mutate(actual = .y))
-# }
-
-get_dens_df <- function(.data, actual, prob){
-
-  probs <- .data %>% select(contains("prob"))
+get_dens_df <- function(.data, actual){
 
   .data %>%
-    dplyr::select(actual = {{actual}}) %>%
-    dplyr::bind_cols(probs) %>%
+    dplyr::select(actual = {{actual}}, contains("prob")) %>%
+    tidyr::gather(var, prob, -actual) %>%
     split(.$actual) %>%
-    purrr::imap(~{ .x %>% rename("prob" = paste0("prob", .y)) }) %>%
     purrr::imap(~{ density(.x$prob) }) %>%
     purrr::imap_dfr(~as.data.frame(.x[c("x", "y")]) %>% dplyr::mutate(actual = .y)) %>%
     dplyr::as_tibble()
-  # if(ncol(probs) > 2) {
-  #
-  # } else {
-  #   .data %>%
-  #     dplyr::select(actual = {{actual}}, prob = .data$prob1) %>%
-  #     split(.$actual) %>%
-  #     purrr::imap(~{ density(.x$prob) }) %>%
-  #     purrr::imap_dfr(~as.data.frame(.x[c("x", "y")]) %>% dplyr::mutate(actual = .y)) %>%
-  #     dplyr::as_tibble()
-  # }
-
 }
-
 
 #' gg_plot_density
 #'

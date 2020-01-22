@@ -1,11 +1,10 @@
 #' get_confusion_df
 #'
 #' @export
-get_confusion_df <- function(.data, actual, pred){
+get_confusion_df <- function(.data, actual){
 
-
-  tab <- .data %>% dplyr::select(actual = {{actual}}, pred = {{pred}})
-  lvls <- sort(unique(c(tab$actual, tab$pred)))
+  tab <- .data %>% dplyr::select(actual = {{actual}}, pred)
+  lvls <- levels(tab[[1]])#sort(unique(c(tab$actual, tab$pred)))
 
   tab %>%
     dplyr::mutate_all(factor, lvls) %>%

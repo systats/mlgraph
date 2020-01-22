@@ -5,21 +5,23 @@
 #     yardstick::roc_curve(actual, prob)
 # }
 #' @export
-get_roc_df <- function(.data, actual, prob){
+get_roc_df <- function(.data, actual){
 
   probs <- .data %>% select(contains("prob"))
 
   if(ncol(probs) > 2) {
+    
     out <- .data %>%
       dplyr::select(actual = {{actual}}, contains("prob")) %>%
       dplyr::mutate_at(1, as.factor) %>%
       yardstick::roc_curve(actual, contains("prob"))
       dplyr::as_tibble()
+      
   } else {
     out <- .data %>%
-      dplyr::select(actual = {{actual}}, contains("prob")) %>%
+      dplyr::select(actual = {{actual}}, prob) %>%
       dplyr::mutate_at(1, as.factor) %>%
-      yardstick::roc_curve(actual, prob1)
+      yardstick::roc_curve(actual, prob)
 
     out$.level <- 1
   }

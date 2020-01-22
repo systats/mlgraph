@@ -4,18 +4,16 @@ save_rds <- function(file, name, path) saveRDS(file, file = glue::glue("{path}/{
 
 #' eval_classifier
 #' @export
-eval_classifier <- function(.data, actual, pred, prob = "prob", path = NULL){
-
-  df <- .data %>% select(actual = {{actual}}, pred = {{pred}}, contains("prob"))
+eval_classifier <- function(.data, actual, path = NULL){
 
   confusion_pos <- purrr::possibly(mlgraph::get_confusion_df, NULL)
   roc_pos <- purrr::possibly(mlgraph::get_roc_df, NULL)
   dens_pos <- purrr::possibly(mlgraph::get_dens_df, NULL)
 
   out <- list(
-    confusion = confusion_pos(.data, {{actual}}, {{pred}}),
-    roc = roc_pos(.data, {{actual}}, contains("prob")),# %>% mutate(.threshold = round(.threshold, 2)) %>% group_by(.threshold) %>% slice(1) %>% ungroup,
-    dens = dens_pos(.data, {{actual}}, contains("prob"))
+    confusion = confusion_pos(.data, {{actual}}),
+    roc = roc_pos(.data, {{actual}}),
+    dens = dens_pos(.data, {{actual}})
   )
 
   if(!is.null(path)) {
@@ -24,3 +22,16 @@ eval_classifier <- function(.data, actual, pred, prob = "prob", path = NULL){
     return(out)
   }
 }
+
+
+
+#' model_eda
+#' @export
+model_eda <- function(self){
+  if(self$meta$task == "linear"){
+    list()
+  } else if(self$meta$task == "binary") {
+    model_eval(self, self$process$ask_y())
+  }
+}
+
