@@ -41,7 +41,7 @@ get_roc_df <- function(.data, actual){
 #' @export
 gg_plot_roc <- function(.data){
   .data %>%
-    ggplot2::ggplot(aes(x = fpr, y = specificity, colour = actual)) +
+    ggplot2::ggplot(aes(x = 1 - sensitivity, y = specificity, colour = actual)) +
     ggplot2::geom_abline(slope = 1, intercept = 0, color = "gray50", linetype = "dashed") +
     ggplot2::geom_line() +
     ggthemes::theme_hc() +
@@ -70,7 +70,7 @@ gg_plot_roc2 <- function(actual, prob){
 #' @export
 hc_plot_roc <- function(.data){
   .data %>%
-    highcharter::hchart("line", highcharter::hcaes(x = fpr, y = specificity, group = actual)) %>%
+    highcharter::hchart("line", highcharter::hcaes(x = 1 - sensitivity, y = specificity, group = actual)) %>%
     highcharter::hc_xAxis(min = 0, max = 1, title = list(text = "FPR (1 - Sensitivity)")) %>%
     highcharter::hc_yAxis(min = 0, max = 1, title = list(text = "TPR (Specificity)")) %>%
     highcharter::hc_add_series(tibble(x = 0:1, y = 0:1), color = "gray") %>%
@@ -82,7 +82,7 @@ hc_plot_roc <- function(.data){
 #' @export
 ax_plot_roc <- function(.data){
   .data %>%
-    apexcharter::apex(type = "line", mapping = apexcharter::aes(x = fpr, y = specificity, color = actual)) %>%
+    apexcharter::apex(type = "line", mapping = apexcharter::aes(x = 1 - sensitivity, y = specificity, color = actual)) %>%
     apexcharter::ax_legend(show = F) %>%
     apexcharter::ax_xaxis(title = list(text = "FPR (1 - Sensitivity)"), min = 0, max = 1, tickAmount = 5, labels = list(formatter = apexcharter::JS("function(val) {return val.toFixed(2);}"))) %>%
     apexcharter::ax_yaxis(title = list(text = "TPR (Specificity)"), tickAmount = 5, labels = list(formatter = apexcharter::JS("function(val) {return val.toFixed(2);}"))) %>%
