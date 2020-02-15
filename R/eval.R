@@ -24,3 +24,12 @@ eval_classifier <- function(params, preds, path = NULL){
     return(out)
   }
 }
+
+#' plot_classifier
+#' @export
+plot_classifier <- function(li){
+  li %>% 
+    imap(~{
+      do.call(glue::glue("ax_plot_{.y}"), list(.data = .x))
+    })
+}

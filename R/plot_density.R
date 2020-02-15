@@ -44,13 +44,11 @@ hc_plot_density <- function(.data){
 #'
 #' @export
 ax_plot_density <- function(.data, ...){
-  #n_group <- length(unique(.data$actual))
   .data %>%
-    apexcharter::apex(type = "line", mapping = apexcharter::aes(x = x, y = y, group = actual), ...) %>%
-    apexcharter::ax_tooltip(shared = T) %>%
+    apexcharter::apex(type = "line", mapping = apexcharter::aes(x = x, y = y, color = actual)) %>%
     apexcharter::ax_legend(show = F) %>%
-    #apexcharter::ax_colors(ggthemes::hc_pal()(n_group)) %>%
     apexcharter::ax_xaxis(title = list(text = "Probability"), min = 0, max = 1, tickAmount = 5, labels = list(formatter = apexcharter::JS("function(val) {return val.toFixed(2);}"))) %>%
-    apexcharter::ax_yaxis(title = list(text = "Density"), min = 0, tickAmount = 5, labels = list(formatter = apexcharter::JS("function(val) {return val.toFixed(2);}"))) 
+    apexcharter::ax_yaxis(title = list(text = "Density"), tickAmount = 5, labels = list(formatter = apexcharter::JS("function(val) {return val.toFixed(2);}"))) %>%
+    apexcharter::ax_tooltip(shared = T)
 }
 

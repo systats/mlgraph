@@ -50,6 +50,6 @@ ax_plot_cutoff <- function(.data){
     apexcharter::apex(type = "line", mapping = apexcharter::aes(x = thres, y = value, color = metric)) %>%
     apexcharter::ax_legend(show = F) %>%
     apexcharter::ax_xaxis(title = list(text = "Probability Threshold"), min = 0, max = 1, tickAmount = 5, labels = list(formatter = apexcharter::JS("function(val) {return val.toFixed(2);}"))) %>%
-    apexcharter::ax_yaxis(title = list(text = ""), tickAmount = 5, labels = list(formatter = apexcharter::JS("function(val) {return val.toFixed(2);}"))) %>%
+    apexcharter::ax_yaxis(title = list(text = "Values"), tickAmount = 5, labels = list(formatter = apexcharter::JS("function(val) {return val.toFixed(2);}"))) %>%
     apexcharter::ax_tooltip(shared = T)
 }

@@ -15,7 +15,7 @@ get_roc_df <- function(.data, actual){
         yardstick::roc_curve(.x, actual, dplyr::contains("prob"))
       }) %>%
       dplyr::mutate(actual = .level) %>%
-      dplyr::mutate(actual = as.factor(actual), sensitivity = 1 - sensitivity) %>%
+      dplyr::mutate(actual = as.factor(actual), fpr = 1 - sensitivity) %>%
       dplyr::rename(thres = .threshold)
       
   } else {
@@ -80,15 +80,12 @@ hc_plot_roc <- function(.data){
 #' ax_plot_roc
 #'
 #' @export
-ax_plot_roc <- function(.data, type = "line", ...){
-  #n_group <- length(unique(.data$actual))
-
+ax_plot_roc <- function(.data){
   .data %>%
-    apexcharter::apex(type = type, mapping = apexcharter::aes(x = fpr, y = specificity, color = actual), ...) %>%
-    apexcharter::ax_tooltip(shared = T) %>%
+    apexcharter::apex(type = "line", mapping = apexcharter::aes(x = fpr, y = specificity, color = actual)) %>%
     apexcharter::ax_legend(show = F) %>%
-    #apexcharter::ax_colors(ggthemes::hc_pal()(n_group)) %>%
-    apexcharter::ax_xaxis(title = list(text = "FPR (1 - Sensitivity)"), min = 0, max = 1, tickAmount = 5, labels = list(formatter = apexcharter::JS("function(val) {return val.toFixed(1);}"))) %>%
-    apexcharter::ax_yaxis(title = list(text = "TPR (Specificity)"), min = 0, max = 1, tickAmount = 5, labels = list(formatter = apexcharter::JS("function(val) {return val.toFixed(1);}")))
+    apexcharter::ax_xaxis(title = list(text = "FPR (1 - Sensitivity)"), min = 0, max = 1, tickAmount = 5, labels = list(formatter = apexcharter::JS("function(val) {return val.toFixed(2);}"))) %>%
+    apexcharter::ax_yaxis(title = list(text = "TPR (Specificity)"), tickAmount = 5, labels = list(formatter = apexcharter::JS("function(val) {return val.toFixed(2);}"))) %>%
+    apexcharter::ax_tooltip(shared = T)
 }
 

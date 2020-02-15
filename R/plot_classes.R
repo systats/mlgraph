@@ -14,5 +14,7 @@ ax_plot_classes <- function(.data){
     apexcharter::apex(type = "column", mapping = aes(x = actual, y = n, fill = pred)) %>%
     apexcharter::ax_chart(stacked = T) %>%
     apexcharter::ax_tooltip(shared = T) %>%
-    apexcharter::ax_legend(show = F)
+    apexcharter::ax_legend(show = F) %>%
+    apexcharter::ax_xaxis(title = list(text = "Predicted")) %>%
+    apexcharter::ax_yaxis(title = list(text = "Actual"))
 }

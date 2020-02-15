@@ -4,7 +4,7 @@
 \alias{ax_plot_roc}
 \title{ax_plot_roc}
 \usage{
-ax_plot_roc(.data, type = "line", ...)
+ax_plot_roc(.data)
 }
 \description{
 ax_plot_roc
