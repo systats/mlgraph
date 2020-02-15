@@ -3,15 +3,13 @@
 #' @export
 get_confusion_df <- function(.data, actual){
 
-  tab <- .data %>% dplyr::select(actual = {{actual}}, pred)
-  lvls <- levels(tab[[1]])#sort(unique(c(tab$actual, tab$pred)))
-
-  tab %>%
-    dplyr::mutate_all(factor, lvls) %>%
+  tab <- .data %>% 
+    dplyr::select(actual = {{actual}}, pred) %>%
+    dplyr::mutate_all(as.factor) %>%
+    dplyr::mutate(pred = factor(pred, levels = levels(actual))) %>%
     dplyr::group_by(actual, pred, .drop = F) %>%
     dplyr::tally() %>%
     dplyr::ungroup() %>%
-
     dplyr::group_by(actual, .drop = F) %>%
     dplyr::mutate(n_actual = sum(n)) %>%
     dplyr::mutate(perc_actual = n/n_actual) %>%
@@ -61,8 +59,8 @@ hc_plot_confusion <- function(.data){
 ax_plot_confusion <- function(.data, ...){
   .data %>%
     apexcharter::apex(type = "heatmap", mapping = apexcharter::aes(x = pred, y = actual, fill = n), colors = "#224ea7", ...) %>%
-    #apexcharter::ax_dataLabels(enabled = FALSE) %>%
-    apexcharter::ax_colors("#224ea7") %>%
+    apexcharter::ax_dataLabels(enabled = T) %>%
+    apexcharter::ax_colors("#008FFB") %>%
     apexcharter::ax_xaxis(title = list(text = "Predicted")) %>%
     apexcharter::ax_yaxis(title = list(text = "Actual"))
 }

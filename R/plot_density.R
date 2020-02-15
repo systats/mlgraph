@@ -1,7 +1,7 @@
 #' get_dens_df
 #'
 #' @export
-get_dens_df <- function(.data, actual){
+get_density_df <- function(.data, actual){
 
   .data %>%
     dplyr::select(actual = {{actual}}, contains("prob")) %>%
@@ -37,19 +37,20 @@ hc_plot_density <- function(.data){
     purrr::reduce(.f = highcharter::hc_add_series, .init = highcharter::highchart()) %>%
     highcharter::hc_xAxis(min = 0, max = 1, title = list(text = "Probability")) %>%
     highcharter::hc_yAxis(min = 0, title = list(text = "Density")) %>%
-    highcharter::hc_legend(enabled = F)
+    highcharter::hc_legend(enabled = F) 
 }
 
 #' ax_plot_density
 #'
 #' @export
 ax_plot_density <- function(.data, ...){
-  n_group <- length(unique(.data$actual))
+  #n_group <- length(unique(.data$actual))
   .data %>%
     apexcharter::apex(type = "line", mapping = apexcharter::aes(x = x, y = y, group = actual), ...) %>%
+    apexcharter::ax_tooltip(shared = T) %>%
     apexcharter::ax_legend(show = F) %>%
-    apexcharter::ax_colors(ggthemes::hc_pal()(n_group)) %>%
-    apexcharter::ax_xaxis(title = list(text = "Probability"), min = 0, max = 1, tickAmount = 5, labels = list(formatter = apexcharter::JS("function(val) {return val.toFixed(1);}"))) %>%
-    apexcharter::ax_yaxis(title = list(text = "Density"), min = 0, tickAmount = 5, labels = list(formatter = apexcharter::JS("function(val) {return val.toFixed(1);}")))
+    #apexcharter::ax_colors(ggthemes::hc_pal()(n_group)) %>%
+    apexcharter::ax_xaxis(title = list(text = "Probability"), min = 0, max = 1, tickAmount = 5, labels = list(formatter = apexcharter::JS("function(val) {return val.toFixed(2);}"))) %>%
+    apexcharter::ax_yaxis(title = list(text = "Density"), min = 0, tickAmount = 5, labels = list(formatter = apexcharter::JS("function(val) {return val.toFixed(2);}"))) 
 }
 

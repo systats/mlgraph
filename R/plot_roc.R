@@ -1,9 +1,5 @@
 #' get_roc_df
-# get_roc_df <- function(actual, prob){
-#   dplyr::tibble(actual, prob) %>%
-#     dplyr::mutate_at(1, as.factor) %>%
-#     yardstick::roc_curve(actual, prob)
-# }
+#'
 #' @export
 get_roc_df <- function(.data, actual){
 
@@ -11,31 +7,41 @@ get_roc_df <- function(.data, actual){
 
   if(ncol(probs) > 2) {
     
-    out <- .data %>%
+    .data %>%
       dplyr::select(actual = {{actual}}, contains("prob")) %>%
       dplyr::mutate_at(1, as.factor) %>%
-      yardstick::roc_curve(actual, contains("prob"))
-      dplyr::as_tibble()
+      split(.$actual) %>%
+      purrr::map_dfr(~{
+        yardstick::roc_curve(.x, actual, dplyr::contains("prob"))
+      }) %>%
+      dplyr::mutate(actual = .level) %>%
+      dplyr::mutate(actual = as.factor(actual), sensitivity = 1 - sensitivity) %>%
+      dplyr::rename(thres = .threshold)
       
   } else {
-    out <- .data %>%
-      dplyr::select(actual = {{actual}}, prob) %>%
-      dplyr::mutate_at(1, as.factor) %>%
-      yardstick::roc_curve(actual, prob)
-
-    out$.level <- 1
+    
+    df <- .data %>%
+      dplyr::select(actual = {{actual}}, prob)
+    
+    unique(df$actual) %>%
+      purrr::map_dfr(~{
+        df %>%
+          dplyr::mutate(actual = as.factor(ifelse(actual == .x, 1, 0))) %>%
+          yardstick::roc_curve(actual, prob) %>%
+          dplyr::mutate(actual = .x)
+      }) %>%
+      dplyr::mutate(actual = as.factor(actual), fpr = 1 - sensitivity) %>%
+      dplyr::rename(thres = .threshold)
   }
-
-  return(dplyr::as_tibble(out))
 }
+
 
 #' gg_plot_roc
 #'
 #' @export
 gg_plot_roc <- function(.data){
   .data %>%
-    dplyr::mutate(.level = as.factor(.level)) %>%
-    ggplot2::ggplot(aes(x = 1 - sensitivity, y = specificity, colour = .level)) +
+    ggplot2::ggplot(aes(x = fpr, y = specificity, colour = actual)) +
     ggplot2::geom_abline(slope = 1, intercept = 0, color = "gray50", linetype = "dashed") +
     ggplot2::geom_line() +
     ggthemes::theme_hc() +
@@ -64,7 +70,7 @@ gg_plot_roc2 <- function(actual, prob){
 #' @export
 hc_plot_roc <- function(.data){
   .data %>%
-    highcharter::hchart("line", highcharter::hcaes(x = 1 - sensitivity, y = specificity, group = .level)) %>%
+    highcharter::hchart("line", highcharter::hcaes(x = fpr, y = specificity, group = actual)) %>%
     highcharter::hc_xAxis(min = 0, max = 1, title = list(text = "FPR (1 - Sensitivity)")) %>%
     highcharter::hc_yAxis(min = 0, max = 1, title = list(text = "TPR (Specificity)")) %>%
     highcharter::hc_add_series(tibble(x = 0:1, y = 0:1), color = "gray") %>%
@@ -75,15 +81,13 @@ hc_plot_roc <- function(.data){
 #'
 #' @export
 ax_plot_roc <- function(.data, type = "line", ...){
-  n_group <- length(unique(.data$.level))
+  #n_group <- length(unique(.data$actual))
 
-  #diag <- tibble(sensitivity = seq(0, 1, length.out = 100), specificity = seq(1, 0, length.out = 100), .level = "diag")
   .data %>%
-    #dplyr::mutate(type = "curve") %>%
-    #dplyr::bind_rows(diag) %>%
-    apexcharter::apex(type = type, mapping = apexcharter::aes(x = 1 - sensitivity, y = specificity, color = .level), ...) %>%
+    apexcharter::apex(type = type, mapping = apexcharter::aes(x = fpr, y = specificity, color = actual), ...) %>%
+    apexcharter::ax_tooltip(shared = T) %>%
     apexcharter::ax_legend(show = F) %>%
-    apexcharter::ax_colors(ggthemes::hc_pal()(n_group)) %>%
+    #apexcharter::ax_colors(ggthemes::hc_pal()(n_group)) %>%
     apexcharter::ax_xaxis(title = list(text = "FPR (1 - Sensitivity)"), min = 0, max = 1, tickAmount = 5, labels = list(formatter = apexcharter::JS("function(val) {return val.toFixed(1);}"))) %>%
     apexcharter::ax_yaxis(title = list(text = "TPR (Specificity)"), min = 0, max = 1, tickAmount = 5, labels = list(formatter = apexcharter::JS("function(val) {return val.toFixed(1);}")))
 }

@@ -15,7 +15,7 @@ knitr::opts_chunk$set(echo = TRUE)
 pacman::p_load(tidyverse, apexcharter, mlgraph, recipes, deeplyr)
 # ggplot2::theme_set(ggplot2::theme_classic())
 # devtools::document()
-# devtools::load_all()
+devtools::load_all()
 # devtools::install()
 ```
 
@@ -60,7 +60,7 @@ nn <- eval_classifier(fb$preds, "am", path = ".")
 
 ```{r}
 devtools::document()
-confusion_df <- get_confusion_df(fb$preds, am)
+confusion_df <- get_confusion_df(preds2, ft_winner)
 
 gg_plot_confusion(confusion_df)
 hc_plot_confusion(confusion_df)
@@ -71,7 +71,19 @@ ax_plot_confusion(confusion_df)
 ## ROC
 
 ```{r}
-roc_df <- get_roc_df(fb$preds, am)
+devtools::load_all()
+roc_df <- get_roc_df(preds2, ft_winner)
+
+# roc_df %>%
+#   mutate(id = 1:n()) %>%
+#   gather(var, value, -.threshold, -actual, -id) %>%
+#   sample_n(100) %>%
+#   arrange(id) %>%
+#   ggplot(aes(.threshold, value, color = var)) +
+#   geom_line()
+# 
+
+#Metrics::
 
 gg_plot_roc(roc_df)
 #gg_plot_roc2(preds$target, preds$prob)
@@ -82,12 +94,29 @@ ax_plot_roc(roc_df)
 
 
 
+```{r}
+devtools::load_all()
+preds2 <- readRDS("/Volumes/storage/MEGA/projects/mlgraph/data/preds2.rds")
+roc_df <- get_roc_df(preds2, ft_winner)
+
+roc_df %>% ax_plot_roc()
+
+preds2 %>% 
+  mutate(ft_winner = as.factor(ft_winner)) %>% 
+  eval_classifier(ft_winner)
+```
+
+
+
+
+
+
 ## RP-Curve
 
 computes the precision at every unique value of the probability column (in addition to infinity)
 
 ```{r}
-rp_df <- get_rp_df(fb$preds$am, fb$preds$prob)
+rp_df <- get_rp_df(preds2$ft_winner01, preds2$prob)
 
 gg_plot_rp(rp_df)
 hc_plot_rp(rp_df)
@@ -99,7 +128,7 @@ ax_plot_rp(rp_df)
 
 ```{r}
 devtools::document()
-dens_df <- get_dens_df(fb$preds, am)
+dens_df <- get_density_df(fb$preds, am)
 
 gg_plot_density(dens_df)
 hc_plot_density(dens_df)
@@ -107,102 +136,23 @@ ax_plot_density(dens_df)
 ```
 
 
-# Binary Threshold
+## Cutoff
 
 ```{r}
-get_metrics_binary_df <- function(actual, pred, prob = NULL){
-  
-  if(!is.null(prob)){
-    pr <- list(
-      ll = Metrics::ll,
-      logloss = Metrics::logLoss,
-      auc = Metrics::auc
-    ) %>% purrr::imap_dfc(~{ .x(actual, prob)[1] })
-  }
-
-  class <- list(
-    precision = Metrics::precision,
-    recall = Metrics::recall,
-    fbeta_score = Metrics::fbeta_score,
-    accuracy = Metrics::accuracy
-  ) %>% purrr::imap_dfc(~{ .x(actual, pred)[1] })
-  
-  if(!is.null(prob)) class <- bind_cols(class, pr)
-  return(class)
-}
-
-get_threshold_binary_df <- function(actual, prob){
-  dplyr::tibble(thres = seq(0, 1,length.out = 100)) %>%
-    split(1:nrow(.)) %>%
-    purrr::map_dfr(~{
-      df <- dplyr::tibble(actual, prob) %>%
-        dplyr::mutate(pred = ifelse(prob > .x$thres, 1, 0))
-      
-      get_metrics_binary_df(df$actual, df$pred) %>% mutate(thres = .x$thres)
-    })
-}
-
-get_metrics_binary_df(preds$target, preds$pred, preds$prob)
-
-get_threshold_binary_df(preds$target, preds$prob) %>%
-  gather(metric, value, -thres) %>%
-  ggplot(aes(thres, value,colour = metric)) +
+get_cutoff_df(preds2, ft_winner01) %>%
+  ggplot(aes(thres, value, colour = metric)) +
   geom_line()
+
+get_cutoff_df(preds2, ft_winner01) %>%
+  ax_plot_cutoff
 ```
 
-
-
-# Multi
-
+## Class Error
 
 ```{r}
-fm <- fit_learner(rec_multi, mtcars, list(), "multi", "rpart")
-fm$predict(mtcars)
-preds <- fm$preds
+get_classes_df(preds2, ft_winner) %>%
+  ax_plot_classes()
 ```
-
-
-## Confusion
-
-```{r}
-confusion_df <- get_confusion_df(preds, cyl, pred)
-#e <- eval_classifier(preds$target, preds$pred)
-confusion_df %>% gg_plot_confusion()
-confusion_df %>% hc_plot_confusion()
-confusion_df %>% ax_plot_confusion()
-```
-
-
-## ROC
-
-```{r}
-roc_df <- get_roc_df(preds, cyl)
-
-gg_plot_roc(roc_df)
-hc_plot_roc(roc_df)
-ax_plot_roc(roc_df)
-```
-
-
-
-## Probability Density
-
-```{r}
-dens_df <- preds %>% get_dens_df(cyl)
-
-gg_plot_density(dens_df)
-hc_plot_density(dens_df)
-ax_plot_density(dens_df)
-```
-
-
-# Evals
-
-```{r}
-devtools::document()
-nn <- eval_classifier(preds, cyl)
-```
-
 
 
 
@@ -237,3 +187,28 @@ lift_df %>%
 
 
 
+
+
+## All together
+
+```{r}
+devtools::document()
+plot_classifier <- function(li){
+  li %>% 
+    imap(~{
+      do.call(glue::glue("ax_plot_{.y}"), list(.data = .x))
+    })
+}
+
+evals <- list(
+  confusion = "ft_winner",
+  classes = "ft_winner",
+  roc = "ft_winner",
+  cutoff = "ft_winner01",
+  density = "ft_winner"
+) %>%
+  eval_classifier(preds2, path = ".")
+
+evals %>%
+  plot_classifier
+```
