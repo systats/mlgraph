@@ -11,7 +11,8 @@ eval_classifier <- function(params, preds, path = NULL){
     classes = purrr::possibly(mlgraph::get_classes_df, NULL),
     roc = purrr::possibly(mlgraph::get_roc_df, NULL),
     cutoff = purrr::possibly(mlgraph::get_cutoff_df, NULL),
-    density = purrr::possibly(mlgraph::get_density_df, NULL)
+    density = purrr::possibly(mlgraph::get_density_df, NULL),
+    avg = purrr::possibly(mlgraph::get_avg_df, NULL)
   ) %>%
     purrr::imap(~{
       do.call(.x, list(.data = preds, actual = params[[.y]]))

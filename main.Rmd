@@ -89,7 +89,7 @@ gg_plot_roc(roc_df)
 #gg_plot_roc2(preds$target, preds$prob)
 hc_plot_roc(roc_df)
 ax_plot_roc(roc_df)
-#ax_plot_roc(roc_df, type = "line")
+#ax_plot_roc(roc_df)
 ```
 
 
@@ -155,6 +155,17 @@ get_classes_df(preds2, ft_winner) %>%
 ```
 
 
+## Avergage Performance
+
+```{r}
+d <-  preds2 %>%
+  get_avg_df(ft_winner) %>%
+  ax_plot_avg()
+
+d
+```
+
+
 
 # Other
 
@@ -205,10 +216,15 @@ evals <- list(
   classes = "ft_winner",
   roc = "ft_winner",
   cutoff = "ft_winner01",
-  density = "ft_winner"
+  density = "ft_winner",
+  avg = "ft_winner"
 ) %>%
-  eval_classifier(preds2, path = ".")
+  eval_classifier(preds2)
 
 evals %>%
   plot_classifier
+
+
+get_avg_df(preds2, "ft_winner")
+do.call(mlgraph::get_avg_df, list(.data = preds2, actual = "ft_winner"))
 ```
